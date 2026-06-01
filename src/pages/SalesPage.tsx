@@ -64,7 +64,7 @@ export function SalesPage({ onPay }: SalesPageProps) {
           ))}
         </div>
       </Card>
-      <div className="price">490 ₽</div>
+      <div className="price">10 ₽</div>
       <p className="small-muted">Одна оплата открывает все 3 инструмента сразу.</p>
       <form className="payment-form" onSubmit={handlePay}>
         <label className="email-field">
