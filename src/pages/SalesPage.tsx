@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
+import { goals, trackGoal } from '../utils/metrika';
 
 type SalesPageProps = {
   onPay: (email: string) => Promise<void> | void;
@@ -110,7 +111,10 @@ export function SalesPage({ onPay }: SalesPageProps) {
           <a href="/personal-data">согласие на обработку персональных данных</a>.
         </p>
         <p className="support-link">
-          Возник вопрос? <a href="mailto:orgetheone@gmail.com?subject=Поддержка%20Gonofat">Напишите в поддержку</a>
+          Возник вопрос?{' '}
+          <a href="mailto:orgetheone@gmail.com?subject=Поддержка%20Gonofat" onClick={() => trackGoal(goals.supportClick)}>
+            Напишите в поддержку
+          </a>
         </p>
       </form>
     </section>
