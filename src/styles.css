@@ -531,10 +531,19 @@ h2 {
   text-align: center;
 }
 
-.support-link a {
+.support-link a,
+.legal-consent a,
+.back-link {
   color: var(--accent-dark);
   font-weight: 760;
   text-decoration: none;
+}
+
+.legal-consent {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .instruction {
@@ -614,6 +623,32 @@ h2 {
   color: var(--accent-dark);
   font-size: 14px;
   font-weight: 780;
+}
+
+.legal-page {
+  padding-bottom: 36px;
+}
+
+.back-link {
+  width: fit-content;
+  font-size: 14px;
+}
+
+.legal-list {
+  display: grid;
+  gap: 12px;
+}
+
+.legal-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.legal-card p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 @media (max-width: 374px) {
