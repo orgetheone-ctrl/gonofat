@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
+import { goals, trackGoal } from '../utils/metrika';
 
 type PaymentSuccessPageProps = {
   onRead: () => void;
@@ -68,6 +69,7 @@ export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
         if (data.paid) {
           setPaymentCheck('paid');
           setMessage('Оплата подтверждена. Доступ открыт.');
+          trackGoal(goals.paymentSuccess);
           return;
         }
 
