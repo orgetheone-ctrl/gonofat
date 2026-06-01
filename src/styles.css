@@ -564,6 +564,30 @@ h2 {
   padding-right: 42px;
 }
 
+.instruction-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.instruction-card li {
+  position: relative;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.instruction-card li::before {
+  position: absolute;
+  left: 0;
+  color: var(--accent-dark);
+  content: "•";
+  font-weight: 820;
+}
+
 .section-number {
   position: absolute;
   top: 16px;
