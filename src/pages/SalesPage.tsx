@@ -6,13 +6,19 @@ type SalesPageProps = {
   onPay: (email: string) => Promise<void> | void;
 };
 
-const items = [
-  'как рассчитать свой калораж',
-  'как читать этикетки',
-  'какие продукты выбирать',
-  'пример меню на день',
-  'чек-лист на 7 дней',
-  'трекер веса и шагов',
+const products = [
+  {
+    title: 'Инструкция',
+    text: 'Пошаговый план питания без жестких диет: калораж, продукты, меню и правила на каждый день.',
+  },
+  {
+    title: 'Бот-уведомлятор',
+    text: 'Напоминает о воде, приемах пищи, шагах и маленьких действиях, которые держат вас в процессе.',
+  },
+  {
+    title: 'Бот чек-лист',
+    text: 'Помогает отмечать ежедневные задания и видеть, что вы реально двигаетесь к результату.',
+  },
 ];
 
 export function SalesPage({ onPay }: SalesPageProps) {
@@ -41,17 +47,25 @@ export function SalesPage({ onPay }: SalesPageProps) {
 
   return (
     <section className="screen">
-      <h1>Ваша инструкция готова</h1>
-      <p className="lead">"Минус 7кг без диет за 1 месяц"</p>
+      <h1>3 инструмента для снижения веса</h1>
+      <p className="lead">По одной цене вы получаете инструкцию и двух ботов, которые помогают не сорваться после покупки.</p>
+      <div className="bundle-badge">Инструкция + бот-уведомлятор + бот чек-лист</div>
       <Card className="sale-card">
-        <p className="card-label">Внутри инструкции:</p>
-        <ul>
-          {items.map((item) => (
-            <li key={item}>{item}</li>
+        <p className="card-label">Что входит в доступ:</p>
+        <div className="product-list">
+          {products.map((product, index) => (
+            <article className="product-item" key={product.title}>
+              <span>{index + 1}</span>
+              <div>
+                <h2>{product.title}</h2>
+                <p>{product.text}</p>
+              </div>
+            </article>
           ))}
-        </ul>
+        </div>
       </Card>
       <div className="price">490 ₽</div>
+      <p className="small-muted">Одна оплата открывает все 3 инструмента сразу.</p>
       <form className="payment-form" onSubmit={handlePay}>
         <label className="email-field">
           <span>Email для чека</span>
