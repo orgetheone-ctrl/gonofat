@@ -142,6 +142,10 @@ export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
       {isPaid && !botUrl && (
         <p className="small-muted">Ссылка на Telegram-бота появится после подключения токена BotFather.</p>
       )}
+      <p className="support-link">
+        Если доступ не открылся, напишите в поддержку:{' '}
+        <a href="mailto:orgetheone@gmail.com?subject=Доступ%20Gonofat">orgetheone@gmail.com</a>
+      </p>
     </section>
   );
 }
