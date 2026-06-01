@@ -31,6 +31,14 @@ export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
   }, []);
 
   useEffect(() => {
+    const isDemo = new URLSearchParams(window.location.search).get('demo') === '1';
+
+    if (isDemo) {
+      setPaymentCheck('paid');
+      setMessage('Демо-режим: доступ открыт для проверки.');
+      return;
+    }
+
     const paymentId = window.localStorage.getItem('gonofatPaymentId');
 
     if (!paymentId) {
