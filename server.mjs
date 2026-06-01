@@ -1,14 +1,20 @@
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 
 const rootDir = process.cwd();
 const distDir = resolve(rootDir, 'dist');
+const dataDir = resolve(rootDir, 'data');
+const botUsersPath = join(dataDir, 'bot-users.json');
 
 loadEnv();
 
 const port = Number(process.env.PORT || 8790);
+const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN || '';
+const telegramWebhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
+const telegramBotUrl = process.env.TELEGRAM_BOT_URL || '';
+const appOrigin = process.env.APP_ORIGIN || process.env.YOOKASSA_RETURN_URL?.replace(/\?.*$/, '') || '';
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -36,6 +42,16 @@ const server = createServer(async (request, response) => {
       return getPaymentStatus(url, response);
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/product-links') {
+      return sendJson(response, 200, {
+        botUrl: telegramBotUrl,
+      });
+    }
+
+    if (request.method === 'POST' && url.pathname === `/api/telegram/webhook/${telegramWebhookSecret}`) {
+      return telegramWebhook(request, response);
+    }
+
     if (url.pathname.startsWith('/api/')) {
       return sendJson(response, 404, { message: 'API route not found' });
     }
@@ -50,6 +66,8 @@ const server = createServer(async (request, response) => {
 server.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+setInterval(sendDueTelegramReminders, 60 * 1000).unref();
 
 async function createPayment(request, response) {
   const shopId = process.env.YOOKASSA_SHOP_ID;
@@ -168,6 +186,360 @@ async function getPaymentStatus(url, response) {
     status: payment.status,
     paid: payment.paid === true || payment.status === 'succeeded',
   });
+}
+
+async function telegramWebhook(request, response) {
+  if (!telegramBotToken || !telegramWebhookSecret) {
+    return sendJson(response, 500, { ok: false, message: 'Telegram bot is not configured' });
+  }
+
+  const update = await readJson(request);
+  await handleTelegramUpdate(update);
+  return sendJson(response, 200, { ok: true });
+}
+
+async function handleTelegramUpdate(update) {
+  if (update.callback_query) {
+    const callback = update.callback_query;
+    const chatId = callback.message?.chat?.id;
+    const data = callback.data;
+
+    if (!chatId || !data) {
+      return;
+    }
+
+    await answerCallbackQuery(callback.id);
+
+    if (data.startsWith('done:')) {
+      await markChecklistItem(chatId, data.slice(5));
+      return sendToday(chatId);
+    }
+
+    if (data.startsWith('remind:')) {
+      return setReminder(chatId, data.slice(7));
+    }
+
+    if (data === 'today') {
+      return sendToday(chatId);
+    }
+
+    if (data === 'progress') {
+      return sendProgress(chatId);
+    }
+  }
+
+  const message = update.message;
+  const chatId = message?.chat?.id;
+  const text = typeof message?.text === 'string' ? message.text.trim() : '';
+
+  if (!chatId) {
+    return;
+  }
+
+  ensureBotUser(chatId, message.from);
+
+  if (text === '/start') {
+    return sendWelcome(chatId);
+  }
+
+  if (text === '/today' || text === 'Сегодня') {
+    return sendToday(chatId);
+  }
+
+  if (text === '/progress' || text === 'Прогресс') {
+    return sendProgress(chatId);
+  }
+
+  if (text === '/reminders' || text === 'Напоминания') {
+    return sendReminderSettings(chatId);
+  }
+
+  if (text === '/help') {
+    return sendHelp(chatId);
+  }
+
+  return sendMessage(chatId, 'Выберите действие ниже или отправьте /today, чтобы открыть чек-лист на сегодня.', mainKeyboard());
+}
+
+function ensureBotUser(chatId, from = {}) {
+  const users = readBotUsers();
+  const id = String(chatId);
+
+  if (!users[id]) {
+    users[id] = {
+      chatId,
+      firstName: from.first_name || '',
+      startedAt: new Date().toISOString(),
+      reminderHour: 9,
+      checklist: {},
+      lastReminderDate: '',
+    };
+  } else if (from.first_name && users[id].firstName !== from.first_name) {
+    users[id].firstName = from.first_name;
+  }
+
+  writeBotUsers(users);
+  return users[id];
+}
+
+async function sendWelcome(chatId) {
+  ensureBotUser(chatId);
+  return sendMessage(
+    chatId,
+    [
+      'Добро пожаловать в Gonofat.',
+      '',
+      'Я буду напоминать о простых действиях и помогать вести ежедневный чек-лист.',
+      'Начните с кнопки "Сегодня".',
+    ].join('\n'),
+    mainKeyboard(),
+  );
+}
+
+async function sendHelp(chatId) {
+  return sendMessage(
+    chatId,
+    [
+      'Что я умею:',
+      '',
+      '/today - чек-лист на сегодня',
+      '/progress - прогресс за 7 дней',
+      '/reminders - настройка напоминаний',
+      '',
+      'Цель не в идеальности, а в том, чтобы каждый день сделать минимум.',
+    ].join('\n'),
+    mainKeyboard(),
+  );
+}
+
+async function sendToday(chatId) {
+  const users = readBotUsers();
+  const user = users[String(chatId)] || ensureBotUser(chatId);
+  const today = getMoscowDateKey();
+  const checklist = getChecklistForDate(user, today);
+  const lines = [
+    `Чек-лист на сегодня (${today}):`,
+    '',
+    `${checklist.water ? '✅' : '⬜'} Вода`,
+    `${checklist.food ? '✅' : '⬜'} Питание по плану`,
+    `${checklist.steps ? '✅' : '⬜'} Шаги или прогулка`,
+    `${checklist.plan ? '✅' : '⬜'} Отметить день без самокритики`,
+  ];
+
+  return sendMessage(chatId, lines.join('\n'), checklistKeyboard(checklist));
+}
+
+async function markChecklistItem(chatId, item) {
+  const allowedItems = new Set(['water', 'food', 'steps', 'plan']);
+
+  if (!allowedItems.has(item)) {
+    return;
+  }
+
+  const users = readBotUsers();
+  const user = users[String(chatId)] || ensureBotUser(chatId);
+  const today = getMoscowDateKey();
+  const checklist = getChecklistForDate(user, today);
+  checklist[item] = !checklist[item];
+  users[String(chatId)] = user;
+  writeBotUsers(users);
+}
+
+async function sendProgress(chatId) {
+  const users = readBotUsers();
+  const user = users[String(chatId)] || ensureBotUser(chatId);
+  const dates = getLastMoscowDates(7);
+  const rows = dates.map((date) => {
+    const checklist = getChecklistForDate(user, date);
+    const count = ['water', 'food', 'steps', 'plan'].filter((item) => checklist[item]).length;
+    return `${date}: ${count}/4`;
+  });
+
+  return sendMessage(chatId, ['Прогресс за 7 дней:', '', ...rows].join('\n'), mainKeyboard());
+}
+
+async function sendReminderSettings(chatId) {
+  return sendMessage(
+    chatId,
+    'Выберите время ежедневного напоминания. Время указано по Москве.',
+    {
+      inline_keyboard: [
+        [
+          { text: '09:00', callback_data: 'remind:9' },
+          { text: '12:00', callback_data: 'remind:12' },
+          { text: '18:00', callback_data: 'remind:18' },
+        ],
+        [{ text: 'Выключить', callback_data: 'remind:off' }],
+      ],
+    },
+  );
+}
+
+async function setReminder(chatId, value) {
+  const users = readBotUsers();
+  const user = users[String(chatId)] || ensureBotUser(chatId);
+
+  if (value === 'off') {
+    user.reminderHour = null;
+    writeBotUsers(users);
+    return sendMessage(chatId, 'Напоминания выключены.', mainKeyboard());
+  }
+
+  const hour = Number(value);
+
+  if (![9, 12, 18].includes(hour)) {
+    return sendMessage(chatId, 'Не удалось выбрать это время.', mainKeyboard());
+  }
+
+  user.reminderHour = hour;
+  user.lastReminderDate = '';
+  writeBotUsers(users);
+  return sendMessage(chatId, `Готово. Буду напоминать каждый день в ${String(hour).padStart(2, '0')}:00 по Москве.`, mainKeyboard());
+}
+
+async function sendDueTelegramReminders() {
+  if (!telegramBotToken) {
+    return;
+  }
+
+  const now = new Date();
+  const moscowHour = (now.getUTCHours() + 3) % 24;
+  const today = getMoscowDateKey(now);
+  const users = readBotUsers();
+  let changed = false;
+
+  for (const user of Object.values(users)) {
+    if (user.reminderHour === null || user.reminderHour === undefined) {
+      continue;
+    }
+
+    if (user.reminderHour !== moscowHour || user.lastReminderDate === today) {
+      continue;
+    }
+
+    user.lastReminderDate = today;
+    changed = true;
+    await sendMessage(
+      user.chatId,
+      'Мягкое напоминание: отметьте сегодняшний чек-лист. Даже 1 пункт лучше, чем ноль.',
+      checklistKeyboard(getChecklistForDate(user, today)),
+    );
+  }
+
+  if (changed) {
+    writeBotUsers(users);
+  }
+}
+
+function mainKeyboard() {
+  return {
+    keyboard: [['Сегодня', 'Прогресс'], ['Напоминания']],
+    resize_keyboard: true,
+  };
+}
+
+function checklistKeyboard(checklist) {
+  return {
+    inline_keyboard: [
+      [{ text: `${checklist.water ? '✅' : '⬜'} Вода`, callback_data: 'done:water' }],
+      [{ text: `${checklist.food ? '✅' : '⬜'} Питание по плану`, callback_data: 'done:food' }],
+      [{ text: `${checklist.steps ? '✅' : '⬜'} Шаги`, callback_data: 'done:steps' }],
+      [{ text: `${checklist.plan ? '✅' : '⬜'} Без самокритики`, callback_data: 'done:plan' }],
+      [{ text: 'Прогресс за 7 дней', callback_data: 'progress' }],
+    ],
+  };
+}
+
+function getChecklistForDate(user, date) {
+  if (!user.checklist) {
+    user.checklist = {};
+  }
+
+  if (!user.checklist[date]) {
+    user.checklist[date] = {
+      water: false,
+      food: false,
+      steps: false,
+      plan: false,
+    };
+  }
+
+  return user.checklist[date];
+}
+
+async function sendMessage(chatId, text, replyMarkup) {
+  if (!telegramBotToken) {
+    return;
+  }
+
+  await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      reply_markup: replyMarkup,
+      disable_web_page_preview: true,
+    }),
+  });
+}
+
+async function answerCallbackQuery(callbackQueryId) {
+  if (!telegramBotToken || !callbackQueryId) {
+    return;
+  }
+
+  await fetch(`https://api.telegram.org/bot${telegramBotToken}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      callback_query_id: callbackQueryId,
+    }),
+  });
+}
+
+function readBotUsers() {
+  if (!existsSync(dataDir)) {
+    mkdirSync(dataDir, { recursive: true });
+  }
+
+  if (!existsSync(botUsersPath)) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(readFileSync(botUsersPath, 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+function writeBotUsers(users) {
+  if (!existsSync(dataDir)) {
+    mkdirSync(dataDir, { recursive: true });
+  }
+
+  writeFileSync(botUsersPath, JSON.stringify(users, null, 2));
+}
+
+function getMoscowDateKey(date = new Date()) {
+  const moscow = new Date(date.getTime() + 3 * 60 * 60 * 1000);
+  return moscow.toISOString().slice(0, 10);
+}
+
+function getLastMoscowDates(days) {
+  const dates = [];
+  const now = new Date();
+
+  for (let index = days - 1; index >= 0; index -= 1) {
+    dates.push(getMoscowDateKey(new Date(now.getTime() - index * 24 * 60 * 60 * 1000)));
+  }
+
+  return dates;
 }
 
 function isValidEmail(email) {
