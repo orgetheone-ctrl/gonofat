@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InputStep } from './components/InputStep';
 import { LoaderScreen } from './components/LoaderScreen';
 import { QuizStep } from './components/QuizStep';
@@ -10,6 +10,7 @@ import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ResultPage } from './pages/ResultPage';
 import { SalesPage } from './pages/SalesPage';
 import { calculateCalories } from './utils/calculateCalories';
+import { goals, initMetrika, trackGoal } from './utils/metrika';
 
 type Screen = 'home' | 'quiz' | 'analysis' | 'result' | 'sales' | 'success' | 'instruction';
 type LegalRoute = 'offer' | 'privacy' | 'personal-data';
@@ -37,6 +38,10 @@ function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
 
+  useEffect(() => {
+    initMetrika();
+  }, []);
+
   const calorieResult = useMemo(() => {
     if (!answers.gender || !answers.age || !answers.height || !answers.weight || !answers.activity) {
       return null;
@@ -58,6 +63,7 @@ function App() {
       const nextIndex = current + 1;
 
       if (nextIndex >= totalQuestions) {
+        trackGoal(goals.quizComplete);
         setScreen('analysis');
         return current;
       }
@@ -67,6 +73,8 @@ function App() {
   }, []);
 
   const handlePay = useCallback(async (email: string) => {
+    trackGoal(goals.paymentClick);
+
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: {
@@ -97,6 +105,7 @@ function App() {
       window.localStorage.setItem('gonofatPaymentId', data.paymentId);
     }
 
+    trackGoal(goals.paymentCreated);
     window.location.href = data.confirmationUrl;
   }, []);
 
@@ -111,7 +120,12 @@ function App() {
   if (screen === 'home') {
     return (
       <main className="app-shell">
-        <HomePage onStart={() => setScreen('quiz')} />
+        <HomePage
+          onStart={() => {
+            trackGoal(goals.quizStart);
+            setScreen('quiz');
+          }}
+        />
       </main>
     );
   }
@@ -119,7 +133,12 @@ function App() {
   if (screen === 'analysis') {
     return (
       <main className="app-shell">
-        <LoaderScreen onComplete={() => setScreen('result')} />
+        <LoaderScreen
+          onComplete={() => {
+            trackGoal(goals.resultView);
+            setScreen('result');
+          }}
+        />
       </main>
     );
   }
@@ -130,7 +149,10 @@ function App() {
         <ResultPage
           caloriesMin={calorieResult.caloriesMin}
           caloriesMax={calorieResult.caloriesMax}
-          onContinue={() => setScreen('sales')}
+          onContinue={() => {
+            trackGoal(goals.salesOpen);
+            setScreen('sales');
+          }}
         />
       </main>
     );
@@ -147,7 +169,12 @@ function App() {
   if (screen === 'success') {
     return (
       <main className="app-shell">
-        <PaymentSuccessPage onRead={() => setScreen('instruction')} />
+        <PaymentSuccessPage
+          onRead={() => {
+            trackGoal(goals.instructionOpen);
+            setScreen('instruction');
+          }}
+        />
       </main>
     );
   }
