@@ -85,7 +85,7 @@ export function SalesPage({ onPay }: SalesPageProps) {
         <h2>После оплаты</h2>
         <p>Вы вернетесь на страницу доступа, где будут инструкция и ссылки на ботов. Чек придет на email, который вы укажете ниже.</p>
       </Card>
-      <div className="price">10 ₽</div>
+      <div className="price">345 ₽</div>
       <p className="small-muted">Одна оплата открывает все 3 инструмента сразу.</p>
       <form className="payment-form" onSubmit={handlePay}>
         <label className="email-field">
