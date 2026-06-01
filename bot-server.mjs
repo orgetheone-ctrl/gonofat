@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 const port = Number(process.env.PORT || 3000);
 const botToken = process.env.TELEGRAM_BOT_TOKEN || '';
 const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
+const isPollingEnabled = process.env.TELEGRAM_POLLING === 'true';
 const dataDir = resolve(process.cwd(), 'data');
 const botUsersPath = join(dataDir, 'bot-users.json');
 
@@ -34,6 +35,10 @@ server.listen(port, '0.0.0.0', () => {
 });
 
 setInterval(sendDueTelegramReminders, 60 * 1000).unref();
+
+if (isPollingEnabled) {
+  startPolling();
+}
 
 function handleTelegramUpdate(update) {
   if (update.callback_query) {
@@ -259,6 +264,48 @@ async function sendTelegramApi(method, payload) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function startPolling() {
+  if (!botToken) {
+    console.log('TELEGRAM_BOT_TOKEN is not configured');
+    return;
+  }
+
+  await sendTelegramApi('deleteWebhook', { drop_pending_updates: true });
+
+  let offset = 0;
+
+  while (true) {
+    try {
+      const updatesResponse = await fetch(
+        `https://api.telegram.org/bot${botToken}/getUpdates?timeout=25&offset=${offset}`,
+      );
+      const updates = await updatesResponse.json();
+
+      if (Array.isArray(updates.result)) {
+        for (const update of updates.result) {
+          offset = update.update_id + 1;
+          const telegramResponse = handleTelegramUpdate(update);
+
+          if (telegramResponse?.method) {
+            const { method, ...payload } = telegramResponse;
+            await sendTelegramApi(method, payload);
+          }
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Polling error';
+      console.log(message);
+      await wait(3000);
+    }
+  }
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function mainKeyboard() {
