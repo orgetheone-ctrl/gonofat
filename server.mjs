@@ -32,6 +32,10 @@ const server = createServer(async (request, response) => {
       return createPayment(request, response);
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/payment-status') {
+      return getPaymentStatus(url, response);
+    }
+
     if (url.pathname.startsWith('/api/')) {
       return sendJson(response, 404, { message: 'API route not found' });
     }
@@ -124,6 +128,45 @@ async function createPayment(request, response) {
     paymentId: payment.id,
     status: payment.status,
     confirmationUrl: payment.confirmation?.confirmation_url,
+  });
+}
+
+async function getPaymentStatus(url, response) {
+  const shopId = process.env.YOOKASSA_SHOP_ID;
+  const secretKey = process.env.YOOKASSA_SECRET_KEY;
+  const paymentId = url.searchParams.get('id');
+
+  if (!shopId || !secretKey) {
+    return sendJson(response, 500, {
+      message: 'Не заданы YOOKASSA_SHOP_ID и YOOKASSA_SECRET_KEY',
+    });
+  }
+
+  if (!paymentId) {
+    return sendJson(response, 400, {
+      message: 'Не передан номер платежа',
+    });
+  }
+
+  const paymentResponse = await fetch(`https://api.yookassa.ru/v3/payments/${encodeURIComponent(paymentId)}`, {
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${shopId}:${secretKey}`).toString('base64')}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const payment = await paymentResponse.json();
+
+  if (!paymentResponse.ok) {
+    return sendJson(response, paymentResponse.status, {
+      message: payment.description || payment.message || 'Не удалось проверить платеж',
+    });
+  }
+
+  return sendJson(response, 200, {
+    paymentId: payment.id,
+    status: payment.status,
+    paid: payment.paid === true || payment.status === 'succeeded',
   });
 }
 
