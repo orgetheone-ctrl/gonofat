@@ -424,6 +424,46 @@ h2 {
   line-height: 1.45;
 }
 
+.how-card,
+.delivery-card {
+  padding: 16px;
+}
+
+.how-list {
+  display: grid;
+  gap: 10px;
+}
+
+.how-item {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.how-item span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--soft-strong);
+  color: var(--accent-dark);
+  font-size: 13px;
+  font-weight: 820;
+}
+
+.how-item p,
+.delivery-card p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.delivery-card h2 {
+  margin-bottom: 6px;
+}
+
 .sale-card ul {
   display: grid;
   gap: 9px;
