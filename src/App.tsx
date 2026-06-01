@@ -62,13 +62,14 @@ function App() {
     });
   }, []);
 
-  const handlePay = useCallback(async () => {
+  const handlePay = useCallback(async (email: string) => {
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        email,
         returnUrl: `${window.location.origin}/?payment=success`,
       }),
     });

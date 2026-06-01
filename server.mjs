@@ -58,8 +58,17 @@ async function createPayment(request, response) {
   }
 
   const body = await readJson(request);
+  const email = typeof body.email === 'string' ? body.email.trim() : '';
+
+  if (!isValidEmail(email)) {
+    return sendJson(response, 400, {
+      message: 'Введите корректный email для чека',
+    });
+  }
+
   const fallbackOrigin = request.headers.origin || `http://localhost:${port}`;
   const returnUrl = process.env.YOOKASSA_RETURN_URL || body.returnUrl || `${fallbackOrigin}/?payment=success`;
+  const productDescription = 'Инструкция "Минус 7кг без диет за 1 месяц"';
 
   const paymentResponse = await fetch('https://api.yookassa.ru/v3/payments', {
     method: 'POST',
@@ -78,7 +87,25 @@ async function createPayment(request, response) {
         type: 'redirect',
         return_url: returnUrl,
       },
-      description: 'Инструкция "Минус 7кг без диет за 1 месяц"',
+      description: productDescription,
+      receipt: {
+        customer: {
+          email,
+        },
+        items: [
+          {
+            description: productDescription,
+            quantity: '1.00',
+            amount: {
+              value: '490.00',
+              currency: 'RUB',
+            },
+            vat_code: 1,
+            payment_subject: 'service',
+            payment_mode: 'full_payment',
+          },
+        ],
+      },
       metadata: {
         product: 'minus-7kg-guide',
       },
@@ -98,6 +125,10 @@ async function createPayment(request, response) {
     status: payment.status,
     confirmationUrl: payment.confirmation?.confirmation_url,
   });
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function serveStatic(pathname, response) {

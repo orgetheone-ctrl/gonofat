@@ -3,7 +3,7 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 
 type SalesPageProps = {
-  onPay: () => Promise<void> | void;
+  onPay: (email: string) => Promise<void> | void;
 };
 
 const items = [
@@ -18,12 +18,21 @@ const items = [
 export function SalesPage({ onPay }: SalesPageProps) {
   const [isPaying, setIsPaying] = useState(false);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
 
-  const handlePay = async () => {
+  const handlePay = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     try {
       setError('');
+
+      if (!email.trim()) {
+        setError('Введите email для чека');
+        return;
+      }
+
       setIsPaying(true);
-      await onPay();
+      await onPay(email.trim());
     } catch (payError) {
       setError(payError instanceof Error ? payError.message : 'Не удалось перейти к оплате');
       setIsPaying(false);
@@ -43,10 +52,24 @@ export function SalesPage({ onPay }: SalesPageProps) {
         </ul>
       </Card>
       <div className="price">490 ₽</div>
-      {error && <p className="field-error">{error}</p>}
-      <Button onClick={handlePay} disabled={isPaying}>
-        {isPaying ? 'Переходим к оплате...' : 'Оплатить и получить доступ'}
-      </Button>
+      <form className="payment-form" onSubmit={handlePay}>
+        <label className="email-field">
+          <span>Email для чека</span>
+          <input
+            type="email"
+            value={email}
+            placeholder="you@example.com"
+            autoComplete="email"
+            disabled={isPaying}
+            required
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </label>
+        {error && <p className="field-error">{error}</p>}
+        <Button type="submit" disabled={isPaying}>
+          {isPaying ? 'Переходим к оплате...' : 'Оплатить и получить доступ'}
+        </Button>
+      </form>
     </section>
   );
 }
