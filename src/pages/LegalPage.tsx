@@ -4,9 +4,9 @@ type LegalPageProps = {
   type: 'offer' | 'privacy' | 'personal-data';
 };
 
-const operatorName = '[ЗАМЕНИТЬ: ФИО / ИП / самозанятый]';
-const operatorInn = '[ЗАМЕНИТЬ: ИНН]';
-const operatorAddress = '[ЗАМЕНИТЬ: адрес или регион ведения деятельности]';
+const operatorName = 'ПОГРЕБНЯК СЕРГЕЙ ВИКТОРОВИЧ (ИП)';
+const operatorInn = '165715246098';
+const operatorAddress = 'улица Краснококшайская, д. 84';
 const supportEmail = 'orgetheone@gmail.com';
 
 const legalContent = {
