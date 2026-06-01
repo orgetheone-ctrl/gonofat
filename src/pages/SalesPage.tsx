@@ -104,6 +104,11 @@ export function SalesPage({ onPay }: SalesPageProps) {
         <Button type="submit" disabled={isPaying}>
           {isPaying ? 'Переходим к оплате...' : 'Оплатить и получить доступ'}
         </Button>
+        <p className="legal-consent">
+          Нажимая кнопку оплаты, вы принимаете <a href="/offer">публичную оферту</a>, соглашаетесь с{' '}
+          <a href="/privacy">политикой конфиденциальности</a> и даете{' '}
+          <a href="/personal-data">согласие на обработку персональных данных</a>.
+        </p>
         <p className="support-link">
           Возник вопрос? <a href="mailto:orgetheone@gmail.com?subject=Поддержка%20Gonofat">Напишите в поддержку</a>
         </p>
