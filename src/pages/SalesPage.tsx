@@ -104,6 +104,9 @@ export function SalesPage({ onPay }: SalesPageProps) {
         <Button type="submit" disabled={isPaying}>
           {isPaying ? 'Переходим к оплате...' : 'Оплатить и получить доступ'}
         </Button>
+        <p className="support-link">
+          Возник вопрос? <a href="mailto:orgetheone@gmail.com?subject=Поддержка%20Gonofat">Напишите в поддержку</a>
+        </p>
       </form>
     </section>
   );
