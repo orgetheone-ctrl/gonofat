@@ -524,6 +524,19 @@ h2 {
   box-shadow: 0 0 0 4px rgba(123, 198, 123, 0.15);
 }
 
+.support-link {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.support-link a {
+  color: var(--accent-dark);
+  font-weight: 760;
+  text-decoration: none;
+}
+
 .instruction {
   padding-bottom: 36px;
 }
