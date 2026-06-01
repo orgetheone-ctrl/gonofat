@@ -8,12 +8,27 @@ type PaymentSuccessPageProps = {
 
 type PaymentCheck = 'checking' | 'paid' | 'pending' | 'error';
 
-const notifierBotUrl = '';
-const checklistBotUrl = '';
-
 export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
   const [paymentCheck, setPaymentCheck] = useState<PaymentCheck>('checking');
   const [message, setMessage] = useState('Проверяем оплату...');
+  const [botUrl, setBotUrl] = useState('');
+
+  useEffect(() => {
+    async function loadProductLinks() {
+      try {
+        const response = await fetch('/api/product-links');
+        const data = (await response.json()) as { botUrl?: string };
+
+        if (data.botUrl) {
+          setBotUrl(data.botUrl);
+        }
+      } catch {
+        setBotUrl('');
+      }
+    }
+
+    loadProductLinks();
+  }, []);
 
   useEffect(() => {
     const paymentId = window.localStorage.getItem('gonofatPaymentId');
@@ -88,10 +103,10 @@ export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
           <h2>Бот-уведомлятор</h2>
           <p>Напоминания, которые помогают держать режим и не выпадать из процесса.</p>
           <Button
-            disabled={!isPaid || !notifierBotUrl}
+            disabled={!isPaid || !botUrl}
             onClick={() => {
-              if (notifierBotUrl) {
-                window.location.href = notifierBotUrl;
+              if (botUrl) {
+                window.location.href = botUrl;
               }
             }}
           >
@@ -104,10 +119,10 @@ export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
           <h2>Бот чек-лист</h2>
           <p>Ежедневные задания и отметки прогресса, чтобы видеть движение к результату.</p>
           <Button
-            disabled={!isPaid || !checklistBotUrl}
+            disabled={!isPaid || !botUrl}
             onClick={() => {
-              if (checklistBotUrl) {
-                window.location.href = checklistBotUrl;
+              if (botUrl) {
+                window.location.href = botUrl;
               }
             }}
           >
@@ -116,8 +131,8 @@ export function PaymentSuccessPage({ onRead }: PaymentSuccessPageProps) {
         </Card>
       </div>
 
-      {isPaid && (!notifierBotUrl || !checklistBotUrl) && (
-        <p className="small-muted">Ссылки на ботов будут добавлены после подключения Telegram-ботов.</p>
+      {isPaid && !botUrl && (
+        <p className="small-muted">Ссылка на Telegram-бота появится после подключения токена BotFather.</p>
       )}
     </section>
   );
