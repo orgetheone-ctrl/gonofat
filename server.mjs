@@ -194,7 +194,12 @@ async function telegramWebhook(request, response) {
   }
 
   const update = await readJson(request);
-  await handleTelegramUpdate(update);
+  const telegramResponse = await handleTelegramUpdate(update);
+
+  if (telegramResponse) {
+    return sendJson(response, 200, telegramResponse);
+  }
+
   return sendJson(response, 200, { ok: true });
 }
 
@@ -419,15 +424,37 @@ async function sendDueTelegramReminders() {
 
     user.lastReminderDate = today;
     changed = true;
-    await sendMessage(
-      user.chatId,
-      'Мягкое напоминание: отметьте сегодняшний чек-лист. Даже 1 пункт лучше, чем ноль.',
-      checklistKeyboard(getChecklistForDate(user, today)),
-    );
+    await sendTelegramApi('sendMessage', {
+      chat_id: user.chatId,
+      text: 'Мягкое напоминание: отметьте сегодняшний чек-лист. Даже 1 пункт лучше, чем ноль.',
+      reply_markup: checklistKeyboard(getChecklistForDate(user, today)),
+      disable_web_page_preview: true,
+    });
   }
 
   if (changed) {
     writeBotUsers(users);
+  }
+}
+
+async function sendTelegramApi(method, payload) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    await fetch(`https://api.telegram.org/bot${telegramBotToken}/${method}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } catch {
+    // Some VPS networks block outgoing Telegram API calls. Interactive bot
+    // replies still work through webhook responses.
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -467,39 +494,25 @@ function getChecklistForDate(user, date) {
   return user.checklist[date];
 }
 
-async function sendMessage(chatId, text, replyMarkup) {
-  if (!telegramBotToken) {
-    return;
-  }
-
-  await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      reply_markup: replyMarkup,
-      disable_web_page_preview: true,
-    }),
-  });
+function sendMessage(chatId, text, replyMarkup) {
+  return {
+    method: 'sendMessage',
+    chat_id: chatId,
+    text,
+    reply_markup: replyMarkup,
+    disable_web_page_preview: true,
+  };
 }
 
-async function answerCallbackQuery(callbackQueryId) {
-  if (!telegramBotToken || !callbackQueryId) {
-    return;
+function answerCallbackQuery(callbackQueryId) {
+  if (!callbackQueryId) {
+    return null;
   }
 
-  await fetch(`https://api.telegram.org/bot${telegramBotToken}/answerCallbackQuery`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      callback_query_id: callbackQueryId,
-    }),
-  });
+  return {
+    method: 'answerCallbackQuery',
+    callback_query_id: callbackQueryId,
+  };
 }
 
 function readBotUsers() {
