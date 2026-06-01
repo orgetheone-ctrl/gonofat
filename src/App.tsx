@@ -5,12 +5,14 @@ import { QuizStep } from './components/QuizStep';
 import { questions } from './data/questions';
 import { HomePage } from './pages/HomePage';
 import { InstructionPage } from './pages/InstructionPage';
+import { LegalPage } from './pages/LegalPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ResultPage } from './pages/ResultPage';
 import { SalesPage } from './pages/SalesPage';
 import { calculateCalories } from './utils/calculateCalories';
 
 type Screen = 'home' | 'quiz' | 'analysis' | 'result' | 'sales' | 'success' | 'instruction';
+type LegalRoute = 'offer' | 'privacy' | 'personal-data';
 
 type QuizAnswers = {
   gender?: 'female' | 'male';
@@ -26,6 +28,8 @@ type QuizAnswers = {
 const totalQuestions = questions.length;
 
 function App() {
+  const legalRoute = getLegalRoute();
+
   const [screen, setScreen] = useState<Screen>(() => {
     const paymentStatus = new URLSearchParams(window.location.search).get('payment');
     return paymentStatus === 'success' ? 'success' : 'home';
@@ -95,6 +99,14 @@ function App() {
 
     window.location.href = data.confirmationUrl;
   }, []);
+
+  if (legalRoute) {
+    return (
+      <main className="app-shell">
+        <LegalPage type={legalRoute} />
+      </main>
+    );
+  }
 
   if (screen === 'home') {
     return (
@@ -171,6 +183,16 @@ function App() {
       )}
     </main>
   );
+}
+
+function getLegalRoute(): LegalRoute | null {
+  const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
+
+  if (pathname === 'offer' || pathname === 'privacy' || pathname === 'personal-data') {
+    return pathname;
+  }
+
+  return null;
 }
 
 export default App;
