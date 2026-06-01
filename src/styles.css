@@ -488,6 +488,32 @@ h2 {
   padding-bottom: 36px;
 }
 
+.access-screen {
+  padding-bottom: 36px;
+}
+
+.access-list {
+  display: grid;
+  gap: 12px;
+}
+
+.access-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.access-card h2 {
+  padding-right: 42px;
+}
+
+.access-card p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
 .instruction-card {
   position: relative;
   padding: 18px;
