@@ -21,6 +21,12 @@ const products = [
   },
 ];
 
+const steps = [
+  'Оплачиваете один раз',
+  'Получаете доступ к 3 инструментам',
+  'Следуете подсказкам каждый день',
+];
+
 export function SalesPage({ onPay }: SalesPageProps) {
   const [isPaying, setIsPaying] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +69,21 @@ export function SalesPage({ onPay }: SalesPageProps) {
             </article>
           ))}
         </div>
+      </Card>
+      <Card className="how-card">
+        <p className="card-label">Как это работает:</p>
+        <div className="how-list">
+          {steps.map((step, index) => (
+            <div className="how-item" key={step}>
+              <span>{index + 1}</span>
+              <p>{step}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card className="delivery-card">
+        <h2>После оплаты</h2>
+        <p>Вы вернетесь на страницу доступа, где будут инструкция и ссылки на ботов. Чек придет на email, который вы укажете ниже.</p>
       </Card>
       <div className="price">10 ₽</div>
       <p className="small-muted">Одна оплата открывает все 3 инструмента сразу.</p>
