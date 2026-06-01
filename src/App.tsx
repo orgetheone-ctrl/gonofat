@@ -75,10 +75,10 @@ function App() {
     });
 
     const responseText = await response.text();
-    let data: { confirmationUrl?: string; message?: string } = {};
+    let data: { confirmationUrl?: string; message?: string; paymentId?: string } = {};
 
     try {
-      data = responseText ? (JSON.parse(responseText) as { confirmationUrl?: string; message?: string }) : {};
+      data = responseText ? (JSON.parse(responseText) as { confirmationUrl?: string; message?: string; paymentId?: string }) : {};
     } catch {
       data = {
         message: 'Сервер оплаты вернул некорректный ответ. Перезапустите сайт командой npm.cmd run dev:full',
@@ -87,6 +87,10 @@ function App() {
 
     if (!response.ok || !data.confirmationUrl) {
       throw new Error(data.message || 'Сервер оплаты не отвечает. Запустите npm.cmd run dev:full');
+    }
+
+    if (data.paymentId) {
+      window.localStorage.setItem('gonofatPaymentId', data.paymentId);
     }
 
     window.location.href = data.confirmationUrl;
