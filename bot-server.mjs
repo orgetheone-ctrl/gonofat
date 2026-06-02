@@ -44,6 +44,7 @@ function handleTelegramUpdate(update) {
   if (update.callback_query) {
     const callback = update.callback_query;
     const chatId = callback.message?.chat?.id;
+    const messageId = callback.message?.message_id;
     const data = callback.data;
 
     if (!chatId || !data) {
@@ -52,7 +53,7 @@ function handleTelegramUpdate(update) {
 
     if (data.startsWith('done:')) {
       markChecklistItem(chatId, data.slice(5));
-      return todayMessage(chatId);
+      return todayMessage(chatId, messageId);
     }
 
     if (data.startsWith('remind:')) {
@@ -60,11 +61,11 @@ function handleTelegramUpdate(update) {
     }
 
     if (data === 'today') {
-      return todayMessage(chatId);
+      return todayMessage(chatId, messageId);
     }
 
     if (data === 'progress') {
-      return progressMessage(chatId);
+      return progressMessage(chatId, messageId);
     }
   }
 
@@ -133,13 +134,13 @@ function ensureBotUser(chatId, from = {}) {
   return users[id];
 }
 
-function todayMessage(chatId) {
+function todayMessage(chatId, messageId) {
   const users = readBotUsers();
   const user = users[String(chatId)] || ensureBotUser(chatId);
   const today = getMoscowDateKey();
   const checklist = getChecklistForDate(user, today);
 
-  return sendMessage(chatId, [
+  return upsertMessage(chatId, messageId, [
     `Чек-лист на сегодня (${today}):`,
     '',
     `${checklist.water ? '✅' : '⬜'} Вода`,
@@ -164,7 +165,7 @@ function markChecklistItem(chatId, item) {
   writeBotUsers(users);
 }
 
-function progressMessage(chatId) {
+function progressMessage(chatId, messageId) {
   const users = readBotUsers();
   const user = users[String(chatId)] || ensureBotUser(chatId);
   const rows = getLastMoscowDates(7).map((date) => {
@@ -173,7 +174,9 @@ function progressMessage(chatId) {
     return `${date}: ${count}/4`;
   });
 
-  return sendMessage(chatId, ['Прогресс за 7 дней:', '', ...rows].join('\n'), mainKeyboard());
+  return upsertMessage(chatId, messageId, ['Прогресс за 7 дней:', '', ...rows].join('\n'), {
+    inline_keyboard: [[{ text: 'Вернуться к чек-листу', callback_data: 'today' }]],
+  });
 }
 
 function reminderSettingsMessage(chatId) {
@@ -353,6 +356,21 @@ function sendMessage(chatId, text, replyMarkup) {
   return {
     method: 'sendMessage',
     chat_id: chatId,
+    text,
+    reply_markup: replyMarkup,
+    disable_web_page_preview: true,
+  };
+}
+
+function upsertMessage(chatId, messageId, text, replyMarkup) {
+  if (!messageId) {
+    return sendMessage(chatId, text, replyMarkup);
+  }
+
+  return {
+    method: 'editMessageText',
+    chat_id: chatId,
+    message_id: messageId,
     text,
     reply_markup: replyMarkup,
     disable_web_page_preview: true,
