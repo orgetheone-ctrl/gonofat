@@ -231,14 +231,17 @@ async function sendDueTelegramReminders() {
       continue;
     }
 
-    user.lastReminderDate = today;
-    changed = true;
-    await sendTelegramApi('sendMessage', {
+    const isSent = await sendTelegramApi('sendMessage', {
       chat_id: user.chatId,
       text: 'Мягкое напоминание: отметьте сегодняшний чек-лист. Даже 1 пункт лучше, чем ноль.',
       reply_markup: checklistKeyboard(getChecklistForDate(user, today)),
       disable_web_page_preview: true,
     });
+
+    if (isSent) {
+      user.lastReminderDate = today;
+      changed = true;
+    }
   }
 
   if (changed) {
@@ -251,7 +254,7 @@ async function sendTelegramApi(method, payload) {
   const timeout = setTimeout(() => controller.abort(), 5000);
 
   try {
-    await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -259,8 +262,10 @@ async function sendTelegramApi(method, payload) {
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
+    return response.ok;
   } catch {
     // Ignore reminder delivery errors; interactive webhook replies continue.
+    return false;
   } finally {
     clearTimeout(timeout);
   }
