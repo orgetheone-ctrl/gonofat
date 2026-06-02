@@ -14,6 +14,7 @@ const port = Number(process.env.PORT || 8790);
 const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN || '';
 const telegramWebhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const telegramBotUrl = process.env.TELEGRAM_BOT_URL || '';
+const googleAppsScriptWebhookUrl = process.env.GOOGLE_APPS_SCRIPT_WEBHOOK_URL || '';
 const appOrigin = process.env.APP_ORIGIN || process.env.YOOKASSA_RETURN_URL?.replace(/\?.*$/, '') || '';
 
 const mimeTypes = {
@@ -50,6 +51,10 @@ const server = createServer(async (request, response) => {
 
     if (request.method === 'POST' && url.pathname === `/api/telegram/webhook/${telegramWebhookSecret}`) {
       return telegramWebhook(request, response);
+    }
+
+    if (request.method === 'POST' && url.pathname === `/api/telegram/google-script/${telegramWebhookSecret}`) {
+      return proxyTelegramToGoogleScript(request, response);
     }
 
     if (url.pathname.startsWith('/api/')) {
@@ -198,6 +203,29 @@ async function telegramWebhook(request, response) {
 
   if (telegramResponse) {
     return sendJson(response, 200, telegramResponse);
+  }
+
+  return sendJson(response, 200, { ok: true });
+}
+
+async function proxyTelegramToGoogleScript(request, response) {
+  if (!googleAppsScriptWebhookUrl) {
+    return sendJson(response, 500, { ok: false, message: 'Google Apps Script webhook is not configured' });
+  }
+
+  const rawBody = await readRawBody(request);
+
+  try {
+    await fetch(googleAppsScriptWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: rawBody,
+      redirect: 'follow',
+    });
+  } catch (error) {
+    console.error(error);
   }
 
   return sendJson(response, 200, { ok: true });
@@ -593,6 +621,22 @@ function readJson(request) {
       } catch {
         reject(new Error('Некорректный JSON в запросе'));
       }
+    });
+
+    request.on('error', reject);
+  });
+}
+
+function readRawBody(request) {
+  return new Promise((resolveBody, reject) => {
+    let rawBody = '';
+
+    request.on('data', (chunk) => {
+      rawBody += chunk;
+    });
+
+    request.on('end', () => {
+      resolveBody(rawBody);
     });
 
     request.on('error', reject);
