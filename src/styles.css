@@ -372,6 +372,16 @@ h2 {
   padding: 18px;
 }
 
+.sales-hero {
+  display: grid;
+  gap: 12px;
+}
+
+.sale-card--accent {
+  border-color: rgba(66, 143, 53, 0.24);
+  background: linear-gradient(180deg, rgba(237, 247, 232, 0.9) 0%, rgba(255, 255, 255, 0.82) 100%);
+}
+
 .bundle-badge {
   width: fit-content;
   border: 1px solid rgba(66, 143, 53, 0.16);
@@ -425,8 +435,44 @@ h2 {
 }
 
 .how-card,
-.delivery-card {
+.delivery-card,
+.honest-card,
+.seller-card {
   padding: 16px;
+}
+
+.trust-card {
+  padding: 16px;
+}
+
+.trust-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trust-list p {
+  position: relative;
+  padding-left: 28px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 620;
+  line-height: 1.4;
+}
+
+.trust-list p::before {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  content: "✓";
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .how-list {
@@ -462,6 +508,120 @@ h2 {
 
 .delivery-card h2 {
   margin-bottom: 6px;
+}
+
+.delivery-list {
+  display: grid;
+  gap: 9px;
+}
+
+.delivery-list p {
+  position: relative;
+  padding-left: 22px;
+}
+
+.delivery-list p::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--accent-dark);
+  content: "✓";
+  font-weight: 850;
+}
+
+.bot-preview-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.9fr);
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+}
+
+.bot-preview-card h2 {
+  margin-bottom: 8px;
+}
+
+.bot-preview-card p,
+.honest-card p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.bot-preview {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(66, 143, 53, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #f3faef 0%, #e3f1dc 100%);
+  padding: 14px;
+}
+
+.bot-message {
+  display: grid;
+  gap: 7px;
+  max-width: 240px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--text);
+  padding: 12px;
+  box-shadow: 0 10px 24px rgba(41, 66, 35, 0.08);
+}
+
+.bot-message strong {
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.bot-message span {
+  font-size: 14px;
+}
+
+.bot-buttons {
+  display: grid;
+  gap: 7px;
+}
+
+.bot-buttons span {
+  border-radius: 10px;
+  background: rgba(66, 143, 53, 0.72);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 760;
+  padding: 9px 10px;
+  text-align: center;
+}
+
+.honest-card {
+  border-color: rgba(52, 73, 94, 0.12);
+  background: #ffffff;
+}
+
+.honest-card h2 {
+  margin-bottom: 8px;
+}
+
+.seller-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.seller-grid p {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-solid);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 10px;
+}
+
+.seller-grid strong {
+  color: var(--text);
+  font-size: 13px;
 }
 
 .sale-card ul {
@@ -543,6 +703,50 @@ h2 {
 .payment-form {
   display: grid;
   gap: 12px;
+}
+
+.faq-list {
+  display: grid;
+  gap: 8px;
+}
+
+.faq-list details {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-solid);
+  padding: 0 12px;
+}
+
+.faq-list summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 760;
+  list-style: none;
+  padding: 12px 0;
+}
+
+.faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-list summary::after {
+  float: right;
+  color: var(--accent-dark);
+  content: "+";
+  font-weight: 850;
+}
+
+.faq-list details[open] summary::after {
+  content: "−";
+}
+
+.faq-list p {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 10px 0 12px;
 }
 
 .email-field {
@@ -711,6 +915,18 @@ h2 {
 
   .home__actions {
     padding-top: 220px;
+  }
+}
+
+@media (max-width: 520px) {
+  .bot-preview-card,
+  .seller-grid,
+  .offer-row {
+    grid-template-columns: 1fr;
+  }
+
+  .countdown {
+    width: 100%;
   }
 }
 
