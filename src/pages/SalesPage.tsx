@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { goals, trackGoal } from '../utils/metrika';
@@ -28,10 +28,29 @@ const steps = [
   'Следуете подсказкам каждый день',
 ];
 
+const offerDurationSeconds = 30 * 60;
+
+function formatTimer(seconds: number) {
+  const safeSeconds = Math.max(0, seconds);
+  const minutes = Math.floor(safeSeconds / 60);
+  const restSeconds = safeSeconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(restSeconds).padStart(2, '0')}`;
+}
+
 export function SalesPage({ onPay }: SalesPageProps) {
   const [isPaying, setIsPaying] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
+  const [secondsLeft, setSecondsLeft] = useState(offerDurationSeconds);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSecondsLeft((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   const handlePay = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -86,7 +105,16 @@ export function SalesPage({ onPay }: SalesPageProps) {
         <h2>После оплаты</h2>
         <p>Вы вернетесь на страницу доступа, где будут инструкция и ссылки на ботов. Чек придет на email, который вы укажете ниже.</p>
       </Card>
-      <div className="price">345 ₽</div>
+      <div className="offer-row">
+        <div className="price">
+          <span className="old-price">345 ₽</span>
+          <span className="new-price">175 ₽</span>
+        </div>
+        <div className="countdown" aria-label="До конца предложения">
+          <span>До конца предложения</span>
+          <strong>{formatTimer(secondsLeft)}</strong>
+        </div>
+      </div>
       <p className="small-muted">Одна оплата открывает все 3 инструмента сразу.</p>
       <form className="payment-form" onSubmit={handlePay}>
         <label className="email-field">
