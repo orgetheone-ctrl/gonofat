@@ -106,7 +106,7 @@ async function createPayment(request, response) {
     },
     body: JSON.stringify({
       amount: {
-        value: '345.00',
+        value: '175.00',
         currency: 'RUB',
       },
       capture: true,
@@ -124,7 +124,7 @@ async function createPayment(request, response) {
             description: productDescription,
             quantity: '1.00',
             amount: {
-              value: '345.00',
+              value: '175.00',
               currency: 'RUB',
             },
             vat_code: 1,
