@@ -485,11 +485,59 @@ h2 {
   font-weight: 800;
 }
 
+.offer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
 .price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
   color: var(--text);
-  font-size: 36px;
-  font-weight: 820;
   line-height: 1;
+}
+
+.old-price {
+  color: var(--muted);
+  font-size: 22px;
+  font-weight: 760;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.new-price {
+  color: var(--text);
+  font-size: 40px;
+  font-weight: 860;
+}
+
+.countdown {
+  min-width: 156px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--soft-solid);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.countdown span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.countdown strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--accent-dark);
+  font-size: 24px;
+  font-weight: 860;
+  font-variant-numeric: tabular-nums;
 }
 
 .payment-form {
