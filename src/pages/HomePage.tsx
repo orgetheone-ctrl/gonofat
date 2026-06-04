@@ -10,18 +10,23 @@ export function HomePage({ onStart }: HomePageProps) {
     <section className="screen home">
       <div className="home__content">
         <div className="brand-mark">GO</div>
-        <p className="home__eyebrow">Персональный план</p>
-        <h1>Минус 7кг без диет за 1 месяц</h1>
-        <p className="lead">Инструкция из 3 шагов без жестких ограничений</p>
+        <p className="home__eyebrow">Диагностика питания</p>
+        <h1>Персональный план снижения веса без жесткой диеты</h1>
+        <p className="lead">Пройдите тест и получите расчет калорий, сценарий на 30 дней и доступ к системе поддержки.</p>
         <Card className="benefits">
-          <p>Расчитаем необходимый калораж</p>
-          <p>Научимся выбирать продукты</p>
-          <p>Подберем активность без похода в зал</p>
+          <p>Расчет калоража под ваш вес и активность</p>
+          <p>План питания без сложных рецептов</p>
+          <p>Telegram-бот с чек-листом и напоминаниями</p>
         </Card>
+        <div className="home-proof">
+          <span>3 инструмента</span>
+          <span>Разовая оплата</span>
+          <span>Чек на email</span>
+        </div>
       </div>
       <div className="home__actions">
-        <Button onClick={onStart}>ПОЛУЧИТЬ ПЛАН</Button>
-        <p className="small-muted">Займет около 1 минуты</p>
+        <Button onClick={onStart}>Пройти тест</Button>
+        <p className="small-muted">Займет 3-4 минуты</p>
       </div>
     </section>
   );
