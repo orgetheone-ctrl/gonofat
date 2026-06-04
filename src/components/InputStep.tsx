@@ -29,8 +29,11 @@ export function InputStep({ question, step, total, onSubmit }: InputStepProps) {
   return (
     <section className="screen screen--quiz">
       <ProgressBar value={step} total={total} />
-      <p className="step-count">Вопрос {step} из {total}</p>
+      <p className="step-count">
+        {question.section || 'Профиль'} · Шаг {step} из {total}
+      </p>
       <h1>{question.title}</h1>
+      {question.subtitle && <p className="muted">{question.subtitle}</p>}
       {question.hint && <p className="muted">{question.hint}</p>}
       <label className="number-field">
         <input
