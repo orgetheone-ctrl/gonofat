@@ -1,5 +1,4 @@
 import type { ChoiceQuestion } from '../data/questions';
-import { Button } from './Button';
 import { ProgressBar } from './ProgressBar';
 
 type QuizStepProps = {
@@ -13,13 +12,17 @@ export function QuizStep({ question, step, total, onSelect }: QuizStepProps) {
   return (
     <section className="screen screen--quiz">
       <ProgressBar value={step} total={total} />
-      <p className="step-count">Вопрос {step} из {total}</p>
+      <p className="step-count">
+        {question.section || 'Профиль'} · Шаг {step} из {total}
+      </p>
       <h1>{question.title}</h1>
+      {question.subtitle && <p className="muted">{question.subtitle}</p>}
       <div className="option-list">
         {question.options.map((option) => (
-          <Button key={option.value} variant="secondary" onClick={() => onSelect(option.value)}>
-            {option.label}
-          </Button>
+          <button className="quiz-option" key={option.value} type="button" onClick={() => onSelect(option.value)}>
+            <strong>{option.label}</strong>
+            {option.description && <span>{option.description}</span>}
+          </button>
         ))}
       </div>
     </section>
