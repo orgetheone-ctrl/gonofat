@@ -9,6 +9,7 @@ import { LegalPage } from './pages/LegalPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ResultPage } from './pages/ResultPage';
 import { SalesPage } from './pages/SalesPage';
+import { UnlinkCardPage } from './pages/UnlinkCardPage';
 import { calculateCalories } from './utils/calculateCalories';
 import { goals, initMetrika, trackGoal } from './utils/metrika';
 
@@ -41,6 +42,7 @@ const totalQuestions = questions.length;
 
 function App() {
   const legalRoute = getLegalRoute();
+  const serviceRoute = getServiceRoute();
 
   const [screen, setScreen] = useState<Screen>(() => {
     const paymentStatus = new URLSearchParams(window.location.search).get('payment');
@@ -124,6 +126,14 @@ function App() {
     return (
       <main className="app-shell">
         <LegalPage type={legalRoute} />
+      </main>
+    );
+  }
+
+  if (serviceRoute === 'unlink-card') {
+    return (
+      <main className="app-shell">
+        <UnlinkCardPage />
       </main>
     );
   }
@@ -222,6 +232,16 @@ function App() {
       )}
     </main>
   );
+}
+
+function getServiceRoute(): 'unlink-card' | null {
+  const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
+
+  if (pathname === 'unlink-card') {
+    return pathname;
+  }
+
+  return null;
 }
 
 function getLegalRoute(): LegalRoute | null {
