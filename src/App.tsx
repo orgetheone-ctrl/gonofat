@@ -20,10 +20,21 @@ type QuizAnswers = {
   age?: number;
   height?: number;
   weight?: number;
+  desiredWeight?: number;
   goal?: string;
+  bodyType?: string;
+  desiredBody?: string;
   activity?: 'low' | 'medium' | 'high';
   steps?: string;
+  nutrition?: string;
   barrier?: string;
+  cravings?: string;
+  schedule?: string;
+  sleep?: string;
+  stress?: string;
+  resultSpeed?: string;
+  motivation?: string;
+  support?: string;
 };
 
 const totalQuestions = questions.length;
@@ -149,6 +160,7 @@ function App() {
         <ResultPage
           caloriesMin={calorieResult.caloriesMin}
           caloriesMax={calorieResult.caloriesMax}
+          answers={answers}
           onContinue={() => {
             trackGoal(goals.salesOpen);
             setScreen('sales');
