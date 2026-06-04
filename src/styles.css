@@ -1122,6 +1122,84 @@ h2 {
   line-height: 1.5;
 }
 
+.unlink-screen {
+  padding-bottom: 36px;
+}
+
+.unlink-hero {
+  display: grid;
+  gap: 12px;
+}
+
+.subscription-card,
+.unlink-card,
+.unlink-note {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.subscription-status {
+  display: grid;
+  gap: 10px;
+}
+
+.subscription-status div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-solid);
+  padding: 12px;
+}
+
+.subscription-status span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 680;
+}
+
+.subscription-status strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.unlink-card p,
+.unlink-note p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.unlink-confirm {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  border: 1px solid rgba(66, 143, 53, 0.22);
+  border-radius: 16px;
+  background: var(--soft-strong);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 680;
+  line-height: 1.4;
+  padding: 14px;
+}
+
+.unlink-confirm input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent-dark);
+}
+
+.unlink-note a {
+  color: var(--accent-dark);
+  font-weight: 760;
+  text-decoration: none;
+}
+
 @media (max-width: 374px) {
   .screen {
     padding-right: 16px;
