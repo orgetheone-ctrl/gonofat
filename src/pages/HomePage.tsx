@@ -10,9 +10,9 @@ export function HomePage({ onStart }: HomePageProps) {
     <section className="screen home">
       <div className="home__content">
         <div className="brand-mark">GO</div>
-        <p className="home__eyebrow">Диагностика питания</p>
-        <h1>Персональный план снижения веса без жесткой диеты</h1>
-        <p className="lead">Пройдите тест и получите расчет калорий, сценарий на 30 дней и доступ к системе поддержки.</p>
+        <p className="home__eyebrow">Персональный план от GONOFAT</p>
+        <h1>-7 кг за 14-30 дней</h1>
+        <p className="lead">Пройдите тест и получите персональный план снижения веса без жесткой диеты.</p>
         <Card className="benefits">
           <p>Расчет калоража под ваш вес и активность</p>
           <p>План питания без сложных рецептов</p>
@@ -25,7 +25,7 @@ export function HomePage({ onStart }: HomePageProps) {
         </div>
       </div>
       <div className="home__actions">
-        <Button onClick={onStart}>Пройти тест</Button>
+        <Button onClick={onStart}>Получить персональный план</Button>
         <p className="small-muted">Займет 3-4 минуты</p>
       </div>
     </section>
