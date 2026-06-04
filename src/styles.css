@@ -104,6 +104,23 @@ input {
   padding-top: 260px;
 }
 
+.home-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-proof span {
+  border: 1px solid rgba(66, 143, 53, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 760;
+  padding: 7px 9px;
+  backdrop-filter: blur(10px);
+}
+
 h1,
 h2,
 p {
@@ -274,6 +291,44 @@ h2 {
   gap: 12px;
 }
 
+.quiz-option {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--text);
+  box-shadow: 0 8px 22px rgba(17, 17, 17, 0.04);
+  cursor: pointer;
+  padding: 16px;
+  text-align: left;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.quiz-option:active {
+  transform: scale(0.985);
+}
+
+.quiz-option:hover {
+  border-color: #cfe7cf;
+  background: var(--soft-solid);
+}
+
+.quiz-option strong {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.quiz-option span {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
 .progress {
   width: 100%;
   height: 8px;
@@ -330,6 +385,66 @@ h2 {
   animation: spin 900ms linear infinite;
 }
 
+.analysis-screen {
+  gap: 18px;
+}
+
+.analysis-progress {
+  display: grid;
+  gap: 8px;
+}
+
+.analysis-progress div {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--soft-strong);
+}
+
+.analysis-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 160ms ease;
+}
+
+.analysis-progress strong {
+  color: var(--accent-dark);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.analysis-list {
+  display: grid;
+  gap: 9px;
+  text-align: left;
+}
+
+.analysis-list p {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-solid);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 680;
+  padding: 11px 12px;
+}
+
+.analysis-list p::before {
+  margin-right: 8px;
+  content: "○";
+}
+
+.analysis-list p.is-active {
+  color: var(--text);
+}
+
+.analysis-list p.is-active::before {
+  color: var(--accent-dark);
+  content: "✓";
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -366,6 +481,110 @@ h2 {
   color: var(--muted);
   font-size: 16px;
   line-height: 1.5;
+}
+
+.result-screen {
+  padding-bottom: 34px;
+}
+
+.result-hero {
+  display: grid;
+  gap: 12px;
+}
+
+.personal-card,
+.profile-card,
+.scenario-card,
+.promo-card {
+  padding: 18px;
+}
+
+.personal-before-after {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.personal-before-after div {
+  display: grid;
+  gap: 5px;
+  border-radius: 16px;
+  background: var(--soft-solid);
+  padding: 14px;
+}
+
+.personal-before-after span,
+.result-metrics p,
+.profile-grid p,
+.scenario-list p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.personal-before-after strong {
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.result-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.result-metrics p {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.result-metrics strong,
+.profile-grid strong,
+.scenario-list strong {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.profile-grid,
+.scenario-list {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.profile-grid p,
+.scenario-list p {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-solid);
+  padding: 11px;
+}
+
+.scenario-card h2,
+.promo-card h2 {
+  margin-bottom: 10px;
+}
+
+.promo-card {
+  display: grid;
+  gap: 12px;
+  border-color: rgba(66, 143, 53, 0.24);
+  background: linear-gradient(180deg, rgba(237, 247, 232, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.promo-card p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
 }
 
 .sale-card {
@@ -921,7 +1140,9 @@ h2 {
 @media (max-width: 520px) {
   .bot-preview-card,
   .seller-grid,
-  .offer-row {
+  .offer-row,
+  .profile-grid,
+  .result-metrics {
     grid-template-columns: 1fr;
   }
 
