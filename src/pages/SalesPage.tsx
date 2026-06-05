@@ -45,7 +45,7 @@ const steps = [
 const faqItems = [
   {
     question: 'Это подписка?',
-    answer: 'Нет. Сейчас это разовая оплата 175 руб. за доступ к инструкции и боту.',
+    answer: 'Нет. Сейчас это разовая оплата 77 руб. за доступ к инструкции и боту.',
   },
   {
     question: 'Когда я получу доступ?',
@@ -225,7 +225,7 @@ export function SalesPage({ onPay }: SalesPageProps) {
       <div className="offer-row">
         <div className="price">
           <span className="old-price">345 руб.</span>
-          <span className="new-price">175 руб.</span>
+          <span className="new-price">77 руб.</span>
         </div>
         <div className="countdown" aria-label="До конца предложения">
           <span>Цена действует еще</span>
@@ -249,7 +249,7 @@ export function SalesPage({ onPay }: SalesPageProps) {
         <p className="small-muted">После нажатия вы перейдете на защищенную страницу оплаты ЮKassa.</p>
         {error && <p className="field-error">{error}</p>}
         <Button type="submit" disabled={isPaying}>
-          {isPaying ? 'Открываем оплату...' : 'Получить доступ за 175 руб.'}
+          {isPaying ? 'Открываем оплату...' : 'Получить доступ за 77 руб.'}
         </Button>
         <div className="faq-list">
           {faqItems.map((item) => (
