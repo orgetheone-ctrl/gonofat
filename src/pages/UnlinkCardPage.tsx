@@ -29,7 +29,7 @@ export function UnlinkCardPage() {
           </div>
           <div>
             <span>Следующее списание</span>
-            <strong>{isRemoved ? 'Не запланировано' : '175 руб. · 04.07.2026'}</strong>
+            <strong>{isRemoved ? 'Не запланировано' : '77 руб. · 04.07.2026'}</strong>
           </div>
         </div>
       </Card>
