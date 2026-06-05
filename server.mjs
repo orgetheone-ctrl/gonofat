@@ -94,7 +94,11 @@ async function createPayment(request, response) {
   }
 
   const fallbackOrigin = request.headers.origin || `http://localhost:${port}`;
-  const returnUrl = process.env.YOOKASSA_RETURN_URL || body.returnUrl || `${fallbackOrigin}/?payment=success`;
+  const returnUrl = getPaymentReturnUrl({
+    configuredReturnUrl: process.env.YOOKASSA_RETURN_URL,
+    requestedReturnUrl: typeof body.returnUrl === 'string' ? body.returnUrl : '',
+    fallbackOrigin,
+  });
   const productDescription = 'Инструкция "Минус 7кг без диет за 1 месяц"';
 
   const paymentResponse = await fetch('https://api.yookassa.ru/v3/payments', {
@@ -106,7 +110,7 @@ async function createPayment(request, response) {
     },
     body: JSON.stringify({
       amount: {
-        value: '175.00',
+        value: '77.00',
         currency: 'RUB',
       },
       capture: true,
@@ -124,7 +128,7 @@ async function createPayment(request, response) {
             description: productDescription,
             quantity: '1.00',
             amount: {
-              value: '175.00',
+              value: '77.00',
               currency: 'RUB',
             },
             vat_code: 1,
@@ -585,6 +589,46 @@ function getLastMoscowDates(days) {
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function getPaymentReturnUrl({ configuredReturnUrl, requestedReturnUrl, fallbackOrigin }) {
+  const publicConfiguredReturnUrl = isPublicHttpUrl(configuredReturnUrl) ? configuredReturnUrl : '';
+  const candidates = [
+    publicConfiguredReturnUrl,
+    requestedReturnUrl,
+    configuredReturnUrl,
+    `${fallbackOrigin}/?payment=success`,
+  ];
+
+  for (const candidate of candidates) {
+    if (isValidHttpUrl(candidate)) {
+      return candidate;
+    }
+  }
+
+  return `http://localhost:${port}/?payment=success`;
+}
+
+function isPublicHttpUrl(value) {
+  if (!isValidHttpUrl(value)) {
+    return false;
+  }
+
+  const url = new URL(value);
+  return !['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname);
+}
+
+function isValidHttpUrl(value) {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
 
 function serveStatic(pathname, response) {
