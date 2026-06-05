@@ -750,9 +750,8 @@ h2 {
 
 .bot-preview-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.9fr);
+  grid-template-columns: 1fr;
   gap: 16px;
-  align-items: center;
   padding: 18px;
 }
 
@@ -770,16 +769,18 @@ h2 {
 .bot-preview {
   display: grid;
   gap: 10px;
+  width: 100%;
+  max-width: 280px;
   border: 1px solid rgba(66, 143, 53, 0.16);
   border-radius: 18px;
   background: linear-gradient(180deg, #f3faef 0%, #e3f1dc 100%);
+  justify-self: center;
   padding: 14px;
 }
 
 .bot-message {
   display: grid;
   gap: 7px;
-  max-width: 240px;
   border-radius: 14px;
   background: #ffffff;
   color: var(--text);
